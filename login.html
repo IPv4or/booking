@@ -63,7 +63,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const API_BASE_URL = 'http://localhost:3000';
+            const API_BASE_URL = 'https://erthaware-booking-api.onrender.com';
             const loginForm = document.getElementById('loginForm');
             const submitBtn = document.getElementById('submitBtn');
             const errorMessageEl = document.getElementById('errorMessage');
@@ -86,9 +86,7 @@
                     const result = await response.json();
 
                     if (response.ok) {
-                        // Store the token in sessionStorage (cleared when tab is closed)
                         sessionStorage.setItem('erthaware-admin-token', result.token);
-                        // Redirect to the admin panel
                         window.location.href = './admin.html';
                     } else {
                         throw new Error(result.message || 'Authentication failed');
@@ -103,3 +101,4 @@
     </script>
 </body>
 </html>
+
