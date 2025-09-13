@@ -53,7 +53,6 @@
 
     <main class="container mx-auto p-4 sm:p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Bookings List (takes 2 columns on large screens) -->
             <div class="lg:col-span-2">
                 <h2 class="font-display text-2xl text-[#3A5A40] mb-4">Scheduled Pickups</h2>
                 <div id="bookingsList" class="space-y-6">
@@ -61,31 +60,20 @@
                 </div>
             </div>
 
-            <!-- Availability Manager -->
             <div>
                 <h2 class="font-display text-2xl text-[#3A5A40] mb-4">Manage Availability</h2>
                  <div class="bg-white/70 p-4 rounded-lg border">
                     <div class="flex items-center justify-between mb-4">
-                        <button id="prevMonth" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
+                        <button id="prevMonth" class="p-2 rounded-full hover:bg-gray-200 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
                         <h3 id="monthYear" class="font-bold text-lg"></h3>
-                        <button id="nextMonth" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </button>
+                        <button id="nextMonth" class="p-2 rounded-full hover:bg-gray-200 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
                     </div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
-                        <!-- Calendar will be rendered here -->
-                    </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center"></div>
                 </div>
                 <div id="availabilityEditor" class="mt-4 bg-white/70 p-4 rounded-lg border hidden">
                     <h3 class="font-bold mb-3">Edit slots for <span id="editingDate"></span>:</h3>
-                    <div id="timeSlotsCheckboxes" class="space-y-2">
-                        <!-- Checkboxes will be rendered here -->
-                    </div>
-                    <button id="saveAvailability" class="mt-4 action-btn w-full bg-[#D97706] text-white p-2 rounded-lg font-bold">
-                        Save Availability
-                    </button>
+                    <div id="timeSlotsCheckboxes" class="space-y-2"></div>
+                    <button id="saveAvailability" class="mt-4 action-btn w-full bg-[#D97706] text-white p-2 rounded-lg font-bold">Save Availability</button>
                 </div>
             </div>
         </div>
@@ -93,26 +81,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const API_BASE_URL = 'http://localhost:3000';
+            const API_BASE_URL = 'https://erthaware-booking-api.onrender.com';
             const token = sessionStorage.getItem('erthaware-admin-token');
 
-            // --- SECURITY CHECK ---
             if (!token) {
                 window.location.href = './login.html';
-                return; // Stop script execution if not authenticated
+                return;
             }
 
-            const authHeaders = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            };
-
-            // --- STATE ---
+            const authHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
             let currentDate = new Date();
             let selectedDate = null;
             let availabilityData = {};
 
-            // --- DOM ELEMENTS ---
             const bookingsListEl = document.getElementById('bookingsList');
             const monthYearEl = document.getElementById('monthYear');
             const calendarGridEl = document.getElementById('calendarGrid');
@@ -124,8 +105,6 @@
             const saveAvailabilityBtn = document.getElementById('saveAvailability');
             const logoutBtn = document.getElementById('logoutBtn');
 
-
-            // --- DATA FETCHING ---
             async function fetchWithAuth(url, options = {}) {
                 const response = await fetch(url, { ...options, headers: { ...options.headers, ...authHeaders } });
                 if (response.status === 401 || response.status === 403) {
@@ -133,9 +112,7 @@
                     window.location.href = './login.html';
                     throw new Error('Authentication failed');
                 }
-                if (!response.ok) {
-                    throw new Error('An API error occurred');
-                }
+                if (!response.ok) throw new Error('An API error occurred');
                 return response.json();
             }
 
@@ -145,24 +122,18 @@
                     renderBookings(bookings);
                 } catch (error) {
                     bookingsListEl.innerHTML = `<p class="text-red-500">${error.message}. Please log in again.</p>`;
-                    console.error('Error fetching bookings:', error);
                 }
             }
             
             async function fetchAvailability() {
                 try {
                     availabilityData = await fetchWithAuth(`${API_BASE_URL}/api/admin/availability`);
-                } catch (error) {
-                    console.error('Error fetching availability overrides:', error);
-                }
+                } catch (error) { console.error('Error fetching availability overrides:', error); }
             }
 
-
-            // --- RENDERING ---
             function renderBookings(bookingsByDate) {
                 if (Object.keys(bookingsByDate).length === 0) {
-                    bookingsListEl.innerHTML = '<p class="text-slate-500">No pickups have been scheduled yet.</p>';
-                    return;
+                    bookingsListEl.innerHTML = '<p class="text-slate-500">No pickups have been scheduled yet.</p>'; return;
                 }
                 let html = '';
                 const sortedDates = Object.keys(bookingsByDate).sort((a, b) => new Date(a) - new Date(b));
@@ -215,7 +186,6 @@
                 timeSlotsCheckboxesEl.innerHTML = checkboxesHtml;
             }
 
-            // --- EVENT LISTENERS ---
             prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
             nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
             logoutBtn.addEventListener('click', () => {
@@ -237,19 +207,14 @@
                 const checkboxes = timeSlotsCheckboxesEl.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => { slots[cb.dataset.slot] = cb.checked; });
                 try {
-                    await fetchWithAuth(`${API_BASE_URL}/api/admin/availability`, {
-                        method: 'POST',
-                        body: JSON.stringify({ date, slots })
-                    });
+                    await fetchWithAuth(`${API_BASE_URL}/api/admin/availability`, { method: 'POST', body: JSON.stringify({ date, slots }) });
                     await fetchAvailability();
                     alert('Availability updated successfully!');
                 } catch(error) {
                     alert(`Error: ${error.message}`);
-                    console.error('Failed to save availability', error);
                 }
             });
 
-            // --- INITIALIZATION ---
             async function initialize() {
                 await fetchAvailability();
                 await fetchBookings();
@@ -260,4 +225,5 @@
     </script>
 </body>
 </html>
+
 
